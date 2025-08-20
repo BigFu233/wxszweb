@@ -143,71 +143,128 @@ const Gallery = () => {
         <div className="works-grid">
           {filteredWorks.map(work => (
             <div key={work._id} className="work-card-wrapper">
-              <Link to={`/works/${work._id}`} className="work-card-link">
-                <div className="work-card">
-                <div className="work-thumbnail">
-                  {work.files && work.files.length > 0 ? (
-                     <>
-                       <img 
-                         src={work.files[0].url} 
-                         alt={work.title}
-                         onError={(e) => {
-                           e.target.style.display = 'none';
-                           e.target.nextSibling.style.display = 'flex';
-                         }}
-                       />
-                       <div className="no-image-placeholder" style={{display: 'none'}}>
-                         {work.type === 'photo' ? 
-                           <Image className="placeholder-icon" /> : 
-                           <Video className="placeholder-icon" />
-                         }
-                       </div>
-                     </>
-                   ) : (
-                     <div className="no-image-placeholder">
-                       {work.type === 'photo' ? 
-                         <Image className="placeholder-icon" /> : 
-                         <Video className="placeholder-icon" />
-                       }
-                     </div>
-                   )}
-                  <div className="work-overlay">
-                    <div className="work-type">
-                      {work.type === 'photo' ? 
-                        <Image className="type-icon" /> : 
-                        <Video className="type-icon" />
-                      }
+              <div className="work-card">
+                {/* 作品图片区域 */}
+                <div className="work-image-section">
+                  <div className="work-image-container">
+                    {/* 优先显示缩略图，如果没有缩略图则显示第一个文件（仅限图片） */}
+                    {work.thumbnail ? (
+                      <img 
+                        src={work.thumbnail} 
+                        alt={work.title || '作品缩略图'}
+                        className="work-image"
+                        onError={(e) => {
+                          e.target.src = '/placeholder.jpg';
+                        }}
+                      />
+                    ) : work.type === 'photo' && work.files?.[0]?.url ? (
+                      <img 
+                        src={work.files[0].url} 
+                        alt={work.title || '作品图片'}
+                        className="work-image"
+                        onError={(e) => {
+                          e.target.src = '/placeholder.jpg';
+                        }}
+                      />
+                    ) : (
+                      <div className="work-placeholder">
+                        {work.type === 'photo' ? 
+                          <Image className="placeholder-icon" /> : 
+                          <Video className="placeholder-icon" />
+                        }
+                        <span className="placeholder-text">
+                          {work.type === 'video' ? '视频缩略图生成中...' : '暂无预览'}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 悬停遮罩层 */}
+                  <div className="work-hover-overlay">
+                    <div className="work-actions">
+                      <Link to={`/works/${work._id}`} className="view-work-btn">
+                        <Eye className="action-icon" />
+                        <span>查看详情</span>
+                      </Link>
                     </div>
-                    <div className="work-views">
-                      <Eye className="view-icon" />
+                  </div>
+                  
+                  {/* 状态徽章 */}
+                  <div className="work-badges">
+                    <div className={`work-type-badge ${work.type}`}>
+                      {work.type === 'photo' ? 
+                        <Image className="badge-icon" /> : 
+                        <Video className="badge-icon" />
+                      }
+                      <span>{work.type === 'photo' ? '摄影' : '视频'}</span>
+                    </div>
+                    
+                    {work.isTaskSubmission && (
+                      <div className="task-badge">
+                        <Target className="badge-icon" />
+                        <span>任务</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* 浏览量 */}
+                  <div className="work-stats">
+                    <div className="views-count">
+                      <Eye className="stats-icon" />
                       <span>{work.views || 0}</span>
                     </div>
                   </div>
                 </div>
                 
-                <div className="work-info">
-                  <h3 className="work-title">{work.title}</h3>
-                  <p className="work-description">{work.description}</p>
+                {/* 作品信息区域 */}
+                <div className="work-info-section">
+                  <div className="work-header">
+                    <h3 className="work-title" title={work.title}>
+                      {work.title || '未命名作品'}
+                    </h3>
+                    <div className="work-category">
+                      {work.category || '其他'}
+                    </div>
+                  </div>
                   
-                  <div className="work-meta">
+                  {work.description && (
+                    <p className="work-description" title={work.description}>
+                      {work.description}
+                    </p>
+                  )}
+                  
+                  <div className="work-metadata">
                     <div className="work-author">
                       <User className="meta-icon" />
-                      <span>{work.authorName}</span>
+                      <span className="author-name">{work.authorName}</span>
                     </div>
+                    
                     <div className="work-date">
                       <Calendar className="meta-icon" />
-                      <span>{new Date(work.createdAt).toLocaleDateString()}</span>
+                      <span className="date-text">
+                        {new Date(work.createdAt).toLocaleDateString('zh-CN', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
                     </div>
-                    {work.isTaskSubmission && (
-                      <div className="work-task">
-                        <Target className="meta-icon task-icon" />
-                        <span>任务作品</span>
-                      </div>
-                    )}
                   </div>
+                  
+                  {work.tags && work.tags.length > 0 && (
+                    <div className="work-tags">
+                      {work.tags.slice(0, 3).map((tag, index) => (
+                        <span key={index} className="work-tag">
+                          {tag}
+                        </span>
+                      ))}
+                      {work.tags.length > 3 && (
+                        <span className="more-tags">+{work.tags.length - 3}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                </div>
-              </Link>
+              </div>
               
               {/* 管理员删除按钮 */}
               {isAdmin && (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Camera, Home, Upload, Image, LogIn, UserPlus, Settings, User, Users, Calendar, ChevronDown, BarChart3, FileText, Shield } from 'lucide-react';
+import { Camera, Home, Upload, Image, LogIn, UserPlus, Settings, User, Users, Calendar, ChevronDown, BarChart3, FileText, Shield, Package } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -72,6 +72,10 @@ const Navbar = () => {
                    <Link to="/admin/tasks" className="dropdown-item">
                      <Calendar className="dropdown-icon" />
                      <span>任务管理</span>
+                   </Link>
+                   <Link to="/admin/assets" className="dropdown-item">
+                     <Package className="dropdown-icon" />
+                     <span>资产管理</span>
                    </Link>
                    <Link to="/admin/settings" className="dropdown-item">
                      <Settings className="dropdown-icon" />

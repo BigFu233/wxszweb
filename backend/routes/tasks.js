@@ -465,23 +465,46 @@ router.post('/:id/submit', authenticateToken, requireMemberOrAdmin, [
       });
     }
 
-    // 更新任务状态
-    await task.updateUserStatus(req.user._id, 'submitted', workId);
+    // 使用原子操作更新任务状态，避免并行保存冲突
+    const updateQuery = {
+      $set: {
+        'assignedTo.$.status': 'submitted',
+        'assignedTo.$.submittedWork': workId,
+        'assignedTo.$.submittedAt': new Date()
+      },
+      $inc: {
+        submissionCount: 1
+      }
+    };
+    
+    await Task.updateOne(
+      { 
+        _id: id, 
+        'assignedTo.user': req.user._id 
+      },
+      updateQuery
+    );
     
     // 关联作品到任务
     work.relatedTask = task._id;
     await work.save();
 
-    await task.populate([
+    // 重新获取任务并更新完成率
+    const updatedTask = await Task.findById(id);
+    updatedTask.updateCompletionRate();
+    await updatedTask.save();
+    
+    // 最后populate数据
+    await updatedTask.populate([
       { path: 'creator', select: 'username realName' },
       { path: 'assignedTo.user', select: 'username realName email' },
-      { path: 'assignedTo.submittedWork', select: 'title type files createdAt' }
+      { path: 'assignedTo.submittedWork', select: 'title type createdAt' }
     ]);
 
     res.json({
       success: true,
       message: '作品提交成功',
-      data: { task }
+      data: { task: updatedTask }
     });
 
   } catch (error) {

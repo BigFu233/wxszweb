@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Trash2, Edit, Search, Filter, Eye, EyeOff } from 'lucide-react';
+import { Users, UserPlus, Trash2, Edit, Search, Filter, Eye, EyeOff, Package, Plus, X } from 'lucide-react';
 import usePageTitle from '../hooks/usePageTitle';
 import { API_ENDPOINTS } from '../config/api';
 import './UserManagement.css';
@@ -21,8 +21,25 @@ const UserManagement = () => {
     email: '',
     password: '',
     realName: '',
-    role: 'user'
+    role: 'user',
+    ownedAssets: []
   });
+  
+  // 设备相关状态
+  const [showAssetForm, setShowAssetForm] = useState(false);
+  const [currentAsset, setCurrentAsset] = useState({
+    assetName: '',
+    serialNumber: '',
+    category: '',
+    brand: '',
+    model: '',
+    condition: '良好',
+    purchaseDate: '',
+    notes: ''
+  });
+  
+  const assetCategories = ['相机', '镜头', '三脚架', '稳定器', '灯光设备', '录音设备', '存储设备', '电脑设备', '其他'];
+  const assetConditions = ['全新', '良好', '一般', '需维修'];
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
@@ -149,8 +166,20 @@ const UserManagement = () => {
           email: '',
           password: '',
           realName: '',
-          role: 'user'
+          role: 'user',
+          ownedAssets: []
         });
+        setCurrentAsset({
+          assetName: '',
+          serialNumber: '',
+          category: '',
+          brand: '',
+          model: '',
+          condition: '良好',
+          purchaseDate: '',
+          notes: ''
+        });
+        setShowAssetForm(false);
         alert('用户创建成功');
       } else {
         setFormErrors({ submit: data.message || '创建失败' });
@@ -262,6 +291,54 @@ const UserManagement = () => {
     }
   };
 
+  // 设备管理函数
+  const handleAddAsset = () => {
+    if (!currentAsset.assetName.trim() || !currentAsset.serialNumber.trim() || !currentAsset.category) {
+      alert('请填写设备名称、识别码和类型');
+      return;
+    }
+    
+    // 检查识别码是否重复
+    const isDuplicate = formData.ownedAssets.some(asset => asset.serialNumber === currentAsset.serialNumber);
+    if (isDuplicate) {
+      alert('设备识别码已存在');
+      return;
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      ownedAssets: [...prev.ownedAssets, { ...currentAsset, addedDate: new Date().toISOString() }]
+    }));
+    
+    setCurrentAsset({
+      assetName: '',
+      serialNumber: '',
+      category: '',
+      brand: '',
+      model: '',
+      condition: '良好',
+      purchaseDate: '',
+      notes: ''
+    });
+    
+    setShowAssetForm(false);
+  };
+  
+  const handleRemoveAsset = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      ownedAssets: prev.ownedAssets.filter((_, i) => i !== index)
+    }));
+  };
+  
+  const handleAssetInputChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentAsset(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
   if (loading) {
     return (
       <div className="user-management-loading">
@@ -351,6 +428,12 @@ const UserManagement = () => {
                       <div className="user-name">{user.realName}</div>
                       <div className="user-username">@{user.username}</div>
                       <div className="user-email">{user.email}</div>
+                      {user.ownedAssets && user.ownedAssets.length > 0 && (
+                        <div className="user-assets">
+                          <Package className="assets-icon" />
+                          <span>{user.ownedAssets.length} 台设备</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -499,6 +582,179 @@ const UserManagement = () => {
                     <option value="admin">管理员</option>
                   </select>
                 </div>
+              </div>
+              
+              {/* 设备信息部分 */}
+              <div className="assets-section">
+                <div className="section-header">
+                  <h4>
+                    <Package className="section-icon" />
+                    持有设备
+                  </h4>
+                  <button 
+                    type="button"
+                    className="btn-add-asset"
+                    onClick={() => setShowAssetForm(true)}
+                  >
+                    <Plus className="btn-icon" />
+                    添加设备
+                  </button>
+                </div>
+                
+                {formData.ownedAssets.length > 0 && (
+                  <div className="assets-list">
+                    {formData.ownedAssets.map((asset, index) => (
+                      <div key={index} className="asset-item">
+                        <div className="asset-info">
+                          <div className="asset-name">{asset.assetName}</div>
+                          <div className="asset-details">
+                            <span className="asset-category">{asset.category}</span>
+                            <span className="asset-serial">#{asset.serialNumber}</span>
+                            {asset.brand && <span className="asset-brand">{asset.brand}</span>}
+                            {asset.model && <span className="asset-model">{asset.model}</span>}
+                          </div>
+                          <div className="asset-condition">{asset.condition}</div>
+                        </div>
+                        <button 
+                          type="button"
+                          className="btn-remove-asset"
+                          onClick={() => handleRemoveAsset(index)}
+                        >
+                          <X className="btn-icon" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {showAssetForm && (
+                  <div className="asset-form">
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">设备名称 *</label>
+                        <input
+                          type="text"
+                          name="assetName"
+                          value={currentAsset.assetName}
+                          onChange={handleAssetInputChange}
+                          placeholder="请输入设备名称"
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">设备类型 *</label>
+                        <select
+                          name="category"
+                          value={currentAsset.category}
+                          onChange={handleAssetInputChange}
+                          className="form-select"
+                        >
+                          <option value="">选择类型</option>
+                          {assetCategories.map(category => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">设备识别码 *</label>
+                        <input
+                          type="text"
+                          name="serialNumber"
+                          value={currentAsset.serialNumber}
+                          onChange={handleAssetInputChange}
+                          placeholder="请输入设备识别码"
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">设备状态</label>
+                        <select
+                          name="condition"
+                          value={currentAsset.condition}
+                          onChange={handleAssetInputChange}
+                          className="form-select"
+                        >
+                          {assetConditions.map(condition => (
+                            <option key={condition} value={condition}>{condition}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">品牌</label>
+                        <input
+                          type="text"
+                          name="brand"
+                          value={currentAsset.brand}
+                          onChange={handleAssetInputChange}
+                          placeholder="请输入品牌"
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">型号</label>
+                        <input
+                          type="text"
+                          name="model"
+                          value={currentAsset.model}
+                          onChange={handleAssetInputChange}
+                          placeholder="请输入型号"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label className="form-label">购买日期</label>
+                        <input
+                          type="date"
+                          name="purchaseDate"
+                          value={currentAsset.purchaseDate}
+                          onChange={handleAssetInputChange}
+                          className="form-input"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label className="form-label">备注</label>
+                        <input
+                          type="text"
+                          name="notes"
+                          value={currentAsset.notes}
+                          onChange={handleAssetInputChange}
+                          placeholder="备注信息"
+                          className="form-input"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="asset-form-actions">
+                      <button 
+                        type="button"
+                        className="btn-cancel"
+                        onClick={() => setShowAssetForm(false)}
+                      >
+                        取消
+                      </button>
+                      <button 
+                        type="button"
+                        className="btn-confirm"
+                        onClick={handleAddAsset}
+                      >
+                        添加设备
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
               
               {formErrors.submit && (

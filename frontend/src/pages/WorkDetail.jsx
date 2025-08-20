@@ -29,10 +29,70 @@ const WorkDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     fetchWorkDetail();
+    // 设置分享URL
+    setShareUrl(window.location.href);
   }, [id]);
+
+  // 分享功能
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('复制失败:', err);
+      // 降级方案
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
+  const shareToSocial = (platform) => {
+    const title = `${work.title} - 无限摄制社团作品`;
+    const description = work.description || '来自无限摄制社团的精彩作品';
+    const url = shareUrl;
+    
+    let shareLink = '';
+    
+    switch (platform) {
+      case 'wechat':
+        // 微信分享需要特殊处理，这里显示二维码或提示
+        alert('请复制链接后在微信中分享');
+        copyToClipboard();
+        break;
+      case 'weibo':
+        shareLink = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&pic=${encodeURIComponent(work.files?.[0]?.url || '')}`;
+        break;
+      case 'qq':
+        shareLink = `https://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description)}`;
+        break;
+      case 'qzone':
+        shareLink = `https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(description)}&pics=${encodeURIComponent(work.files?.[0]?.url || '')}`;
+        break;
+      default:
+        return;
+    }
+    
+    if (shareLink) {
+      window.open(shareLink, '_blank', 'width=600,height=400');
+    }
+  };
 
   const fetchWorkDetail = async () => {
     try {
@@ -300,7 +360,7 @@ const WorkDetail = () => {
             <Download className="icon" />
             下载全部
           </button>
-          <button className="action-btn">
+          <button className="action-btn" onClick={handleShare}>
             <Share2 className="icon" />
             分享
           </button>
@@ -401,19 +461,20 @@ const WorkDetail = () => {
                 </div>
               )}
             </div>
-            
-            <div className="work-stats">
-              <button 
-                className={`stat-btn like-btn ${isLiked ? 'liked' : ''}`}
-                onClick={handleLike}
-              >
-                <Heart className="icon" />
-                <span>{work.likes || 0} 点赞</span>
-              </button>
-              <div className="stat-item">
-                <MessageCircle className="icon" />
-                <span>{work.comments?.length || 0} 评论</span>
-              </div>
+          </div>
+
+          {/* Work Stats */}
+          <div className="work-stats">
+            <button 
+              className={`stat-btn like-btn ${isLiked ? 'liked' : ''}`}
+              onClick={handleLike}
+            >
+              <Heart className="icon" />
+              <span>{work.likes || 0} 点赞</span>
+            </button>
+            <div className="stat-item">
+              <MessageCircle className="icon" />
+              <span>{work.comments?.length || 0} 评论</span>
             </div>
           </div>
 
@@ -496,6 +557,91 @@ const WorkDetail = () => {
                 <Download className="icon" />
                 下载
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="share-modal-overlay" onClick={() => setShowShareModal(false)}>
+          <div className="share-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="share-modal-header">
+              <h3>分享作品</h3>
+              <button 
+                className="share-modal-close"
+                onClick={() => setShowShareModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="share-modal-body">
+              <div className="share-preview">
+                <div className="share-preview-image">
+                  {work.files?.[0]?.url ? (
+                    <img src={work.files[0].url} alt={work.title} />
+                  ) : (
+                    <div className="no-preview">无预览</div>
+                  )}
+                </div>
+                <div className="share-preview-info">
+                  <h4>{work.title}</h4>
+                  <p>{work.description || '来自无限摄制社团的精彩作品'}</p>
+                </div>
+              </div>
+              
+              <div className="share-options">
+                <h4>分享到社交平台</h4>
+                <div className="share-buttons">
+                  <button 
+                    className="share-btn wechat"
+                    onClick={() => shareToSocial('wechat')}
+                  >
+                    <img src="/wechat.svg" alt="微信" className="share-icon" />
+                    <span>微信</span>
+                  </button>
+                  <button 
+                    className="share-btn weibo"
+                    onClick={() => shareToSocial('weibo')}
+                  >
+                    <span className="share-icon">微</span>
+                    <span>微博</span>
+                  </button>
+                  <button 
+                    className="share-btn qq"
+                    onClick={() => shareToSocial('qq')}
+                  >
+                    <span className="share-icon">Q</span>
+                    <span>QQ</span>
+                  </button>
+                  <button 
+                    className="share-btn qzone"
+                    onClick={() => shareToSocial('qzone')}
+                  >
+                    <span className="share-icon">空</span>
+                    <span>QQ空间</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="share-link">
+                <h4>复制链接</h4>
+                <div className="link-input-group">
+                  <input 
+                    type="text" 
+                    value={shareUrl} 
+                    readOnly 
+                    className="link-input"
+                  />
+                  <button 
+                    className={`copy-btn ${copySuccess ? 'success' : ''}`}
+                    onClick={copyToClipboard}
+                  >
+                    {copySuccess ? '已复制!' : '复制'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -34,7 +34,15 @@ export const API_ENDPOINTS = {
   TASKS: `${API_BASE_URL}/api/tasks`,
   TASK_DETAIL: (id) => `${API_BASE_URL}/api/tasks/${id}`,
   TASK_ASSIGN: (id) => `${API_BASE_URL}/api/tasks/${id}/assign`,
-  TASK_SUBMIT: (id) => `${API_BASE_URL}/api/tasks/${id}/submit`
+  TASK_SUBMIT: (id) => `${API_BASE_URL}/api/tasks/${id}/submit`,
+  
+  // 资产相关
+  ASSETS: `${API_BASE_URL}/api/assets`,
+  ASSET_DETAIL: (id) => `${API_BASE_URL}/api/assets/${id}`,
+  ASSET_ASSIGN: (id) => `${API_BASE_URL}/api/assets/${id}/assign`,
+  ASSET_RETURN: (id) => `${API_BASE_URL}/api/assets/${id}/return`,
+  ASSET_MAINTENANCE: (id) => `${API_BASE_URL}/api/assets/${id}/maintenance`,
+  ASSET_STATS: `${API_BASE_URL}/api/assets/stats/overview`
 };
 
 export default API_BASE_URL;

@@ -6,10 +6,12 @@ const path = require('path');
 require('dotenv').config();
 
 const connectDB = require('./config/database');
+const { checkFFmpegAvailability } = require('./utils/videoProcessor');
 const authRoutes = require('./routes/auth');
 const workRoutes = require('./routes/works');
 const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/tasks');
+const assetRoutes = require('./routes/assets');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,7 +22,16 @@ connectDB();
 // 中间件
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "http://localhost:5000", "http://localhost:5173"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      connectSrc: ["'self'", "http://localhost:5000", "http://localhost:5173"]
+    }
+  }
 }));
 app.use(morgan('combined'));
 app.use(cors({
@@ -83,6 +94,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/works', workRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/assets', assetRoutes);
 
 // 健康检查端点
 app.get('/api/health', (req, res) => {
@@ -111,9 +123,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 服务器运行在端口 ${PORT}`);
   console.log(`📱 前端地址: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
   console.log(`🌐 后端地址: http://localhost:${PORT}`);
   console.log(`📊 健康检查: http://localhost:${PORT}/api/health`);
+  
+  // 检查FFmpeg是否可用
+  try {
+    await checkFFmpegAvailability();
+    console.log('✅ FFmpeg 检查通过，视频缩略图功能可用');
+  } catch (error) {
+    console.warn('⚠️  FFmpeg 不可用，视频缩略图功能将无法正常工作');
+    console.warn('📖 请参考安装指南: backend/FFMPEG_INSTALL_GUIDE.md');
+  }
 });

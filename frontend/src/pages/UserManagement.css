@@ -230,6 +230,21 @@
   font-size: 0.85rem;
 }
 
+.user-assets {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #667eea;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.assets-icon {
+  width: 14px;
+  height: 14px;
+}
+
 /* Role Select */
 .role-select {
   padding: 8px 12px;
@@ -371,7 +386,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1001;
   padding: 20px;
 }
 
@@ -691,5 +706,197 @@
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+}
+
+/* 设备管理样式 */
+.assets-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.section-icon {
+  width: 20px;
+  height: 20px;
+  color: #667eea;
+}
+
+.btn-add-asset {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-add-asset:hover {
+  background: #bbdefb;
+  border-color: #90caf9;
+}
+
+.assets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.asset-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.asset-item:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.asset-info {
+  flex: 1;
+}
+
+.asset-name {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.asset-details {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.asset-category {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.asset-serial {
+  color: #666;
+  font-size: 0.85rem;
+  font-family: monospace;
+}
+
+.asset-brand,
+.asset-model {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.asset-condition {
+  color: #28a745;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.btn-remove-asset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-remove-asset:hover {
+  background: #ffcdd2;
+  border-color: #ef9a9a;
+}
+
+.asset-form {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
+}
+
+.asset-form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+.btn-confirm {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* 响应式设计 - 设备部分 */
+@media (max-width: 768px) {
+  .section-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .asset-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .asset-details {
+    flex-wrap: wrap;
+  }
+  
+  .asset-form-actions {
+    flex-direction: column;
   }
 }

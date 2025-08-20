@@ -23,6 +23,7 @@ const requireMemberOrAdmin = (req, res, next) => {
   next();
 };
 const { uploadMultiple, getFileUrl, deleteFiles } = require('../middleware/upload');
+const { processVideoFile } = require('../utils/videoProcessor');
 const path = require('path');
 
 const router = express.Router();
@@ -150,7 +151,10 @@ router.get('/', optionalAuth, [
       files: work.files.map(file => ({
         ...file,
         url: getFileUrl(req, file.path)
-      }))
+      })),
+      thumbnail: work.thumbnail ? getFileUrl(req, work.thumbnail) : 
+                 (work.type === 'video' && work.files.length > 0 ? null : 
+                  (work.files.length > 0 ? getFileUrl(req, work.files[0].path) : null))
     }));
 
     res.json({
@@ -210,7 +214,10 @@ router.get('/:id', optionalAuth, async (req, res) => {
       files: work.files.map(file => ({
         ...file,
         url: getFileUrl(req, file.path)
-      }))
+      })),
+      thumbnail: work.thumbnail ? getFileUrl(req, work.thumbnail) : 
+                 (work.type === 'video' && work.files.length > 0 ? null : 
+                  (work.files.length > 0 ? getFileUrl(req, work.files[0].path) : null))
     };
 
     res.json({
@@ -285,6 +292,19 @@ router.post('/', authenticateToken, requireMemberOrAdmin, uploadMultiple('files'
       url: getFileUrl(req, file.path)
     }));
 
+    // 生成视频缩略图
+    let thumbnailPath = '';
+    if (type === 'video' && req.files.length > 0) {
+      try {
+        const thumbnailDir = path.join(__dirname, '../uploads/thumbnails');
+        thumbnailPath = await processVideoFile(req.files[0], thumbnailDir);
+        console.log('视频缩略图生成成功:', thumbnailPath);
+      } catch (error) {
+        console.error('生成视频缩略图失败:', error);
+        // 不阻止作品创建，只是没有缩略图
+      }
+    }
+
     // 创建作品
     const work = new Work({
       title,
@@ -293,6 +313,7 @@ router.post('/', authenticateToken, requireMemberOrAdmin, uploadMultiple('files'
       author: req.user._id,
       authorName,
       files,
+      thumbnail: thumbnailPath,
       category: category || '其他',
       tags: tags ? (Array.isArray(tags) ? tags : [tags]) : []
     });

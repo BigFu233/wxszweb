@@ -62,7 +62,52 @@ const userSchema = new mongoose.Schema({
     totalWorks: { type: Number, default: 0 },
     totalViews: { type: Number, default: 0 },
     totalLikes: { type: Number, default: 0 }
-  }
+  },
+  
+  // 设备持有信息
+  ownedAssets: [{
+    assetId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Asset'
+    },
+    assetName: {
+      type: String,
+      required: true
+    },
+    serialNumber: {
+      type: String,
+      required: true
+    },
+    category: {
+      type: String,
+      required: true
+    },
+    brand: {
+      type: String,
+      default: ''
+    },
+    model: {
+      type: String,
+      default: ''
+    },
+    condition: {
+      type: String,
+      enum: ['全新', '良好', '一般', '需维修'],
+      default: '良好'
+    },
+    purchaseDate: {
+      type: Date
+    },
+    notes: {
+      type: String,
+      maxlength: [200, '备注不能超过200个字符'],
+      default: ''
+    },
+    addedDate: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true,
   toJSON: { virtuals: true },

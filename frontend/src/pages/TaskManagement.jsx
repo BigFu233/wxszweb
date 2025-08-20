@@ -173,12 +173,19 @@ const TaskManagement = () => {
 
   const handleCreateTask = async (e) => {
     e.preventDefault();
+    console.log('表单提交开始', formData);
     
     if (!validateForm()) {
+      console.log('表单验证失败', formErrors);
+      console.log('当前表单数据:', formData);
+      // 显示具体的验证错误
+      const errorMessages = Object.values(formErrors).join(', ');
+      alert(`表单验证失败: ${errorMessages}`);
       return;
     }
 
     setSubmitting(true);
+    console.log('开始提交任务数据');
     
     try {
       const token = localStorage.getItem('token');
@@ -193,6 +200,9 @@ const TaskManagement = () => {
         }
       };
       
+      console.log('发送API请求到:', API_ENDPOINTS.TASKS);
+      console.log('请求数据:', submitData);
+      
       const response = await fetch(`${API_ENDPOINTS.TASKS}`, {
         method: 'POST',
         headers: {
@@ -202,7 +212,9 @@ const TaskManagement = () => {
         body: JSON.stringify(submitData)
       });
       
+      console.log('API响应状态:', response.status);
       const data = await response.json();
+      console.log('API响应数据:', data);
       
       if (data.success) {
         await fetchTasks();
@@ -210,6 +222,7 @@ const TaskManagement = () => {
         resetForm();
         alert('任务创建成功');
       } else {
+        console.log('创建失败:', data.message);
         setFormErrors({ submit: data.message || '创建失败' });
       }
     } catch (error) {
@@ -391,8 +404,9 @@ const TaskManagement = () => {
               <button 
                 className="btn-create-task"
                 onClick={() => {
+                  console.log('创建任务按钮被点击');
                   setShowCreateModal(true);
-                  setSubmitting(false);
+                  resetForm();
                 }}
               >
                 <Plus className="btn-icon" />

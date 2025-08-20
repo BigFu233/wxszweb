@@ -141,7 +141,8 @@ taskSchema.methods.updateCompletionRate = function() {
     ).length;
     this.completionRate = Math.round((completedCount / this.assignedTo.length) * 100);
   }
-  return this.save();
+  // 不在这里保存文档，由调用者决定何时保存
+  return this;
 };
 
 // 分配任务给用户的方法

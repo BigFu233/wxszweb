@@ -26,7 +26,7 @@ const TaskList = () => {
   }, []);
 
   useEffect(() => {
-    if (currentUser && currentUser.role === 'member') {
+    if (currentUser && (currentUser.role === 'member' || currentUser.role === 'admin')) {
       fetchMyTasks();
       fetchMyWorks();
     }
@@ -166,8 +166,8 @@ const TaskList = () => {
     return new Date(deadline) < new Date();
   };
 
-  // 如果不是社员，显示权限提示
-  if (!currentUser || currentUser.role !== 'member') {
+  // 如果不是社员或管理员，显示权限提示
+  if (!currentUser || (currentUser.role !== 'member' && currentUser.role !== 'admin')) {
     return (
       <div className="task-list-unauthorized">
         <div className="container">
@@ -401,8 +401,8 @@ const TaskList = () => {
                       />
                       <div className="work-info">
                         <div className="work-thumbnail">
-                          {work.files && work.files[0] ? (
-                            <img src={work.files[0].url} alt={work.title} />
+                          {work.thumbnail ? (
+                            <img src={work.thumbnail} alt={work.title} />
                           ) : (
                             <div className="no-thumbnail">
                               {work.type === 'photo' ? '📷' : '🎬'}

@@ -163,12 +163,12 @@ const workSchema = new mongoose.Schema({
 
 // 虚拟字段：评论数量
 workSchema.virtual('commentCount').get(function() {
-  return this.comments.length;
+  return this.comments ? this.comments.length : 0;
 });
 
 // 虚拟字段：文件数量
 workSchema.virtual('fileCount').get(function() {
-  return this.files.length;
+  return this.files ? this.files.length : 0;
 });
 
 // 增加浏览量方法

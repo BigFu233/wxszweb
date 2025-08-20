@@ -193,22 +193,31 @@ const AdminWorkDetail = () => {
           返回管理面板
         </Link>
         
-        <div className="review-actions">
-          <button 
-            className="review-btn approve-btn"
-            onClick={() => openReviewModal('approve')}
-          >
-            <CheckCircle className="icon" />
-            通过审核
-          </button>
-          <button 
-            className="review-btn reject-btn"
-            onClick={() => openReviewModal('reject')}
-          >
-            <XCircle className="icon" />
-            拒绝审核
-          </button>
-        </div>
+        {work.status === 'pending' ? (
+          <div className="review-actions">
+            <button 
+              className="review-btn approve-btn"
+              onClick={() => openReviewModal('approve')}
+            >
+              <CheckCircle className="icon" />
+              通过审核
+            </button>
+            <button 
+              className="review-btn reject-btn"
+              onClick={() => openReviewModal('reject')}
+            >
+              <XCircle className="icon" />
+              拒绝审核
+            </button>
+          </div>
+        ) : (
+          <div className="review-status">
+            <span className={`status-info ${work.status}`}>
+              {work.status === 'approved' ? '✓ 已通过审核' :
+               work.status === 'rejected' ? '✗ 已拒绝审核' : '已处理'}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="admin-work-content">
@@ -284,7 +293,13 @@ const AdminWorkDetail = () => {
                 </div>
                 <div className="admin-meta-item">
                   <Eye className="meta-icon" />
-                  <span>状态: {work.status === 'pending' ? '待审核' : work.status}</span>
+                  <span>状态: 
+                    <span className={`status-badge ${work.status}`}>
+                      {work.status === 'pending' ? '待审核' : 
+                       work.status === 'approved' ? '已通过' :
+                       work.status === 'rejected' ? '已拒绝' : work.status}
+                    </span>
+                  </span>
                 </div>
               </div>
               
